@@ -1,41 +1,21 @@
-from flask import Flask, jsonify, request, flash, url_for, redirect, \
+from flask import Blueprint, jsonify, request, flash, url_for, redirect, \
                   render_template
 
-from flask_sqlalchemy import SQLAlchemy
+from contact_store.models import db
+from contact_store.models import Contact
 
-app = Flask(__name__)
-app.config.from_pyfile('contact_store.cfg')
-db = SQLAlchemy(app)
-
-
-class Contact(db.Model):
-    __tablename__ = 'contacts'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    first_name = db.Column(db.String(80), nullable=False)
-    surname = db.Column(db.String(80), nullable=False)
-
-    @property
-    def serialize(self):
-        return {
-            'username'   : self.username,
-            'email'      : self.email,
-            'first_name' : self.first_name,
-            'surname'    : self.surname,
-        }
-
+bp = Blueprint('contacts', __name__, url_prefix='/contacts')
 
 def get_contact(username):
     return Contact.query.filter_by(username=username).first()
 
-@app.route('/contacts', methods=['GET'])
+@bp.route('/', methods=['GET'])
 def list_contacts():
     if request.method == 'GET':
         return jsonify(contacts=[i.serialize for i in Contact.query.all()])
 
 
-@app.route('/contacts/<username>', methods=['GET'])
+@bp.route('/<username>', methods=['GET'])
 def show_contact(username):
     contact = get_contact(username)
 
@@ -46,7 +26,7 @@ def show_contact(username):
         return content, 404
 
 
-@app.route('/contacts/<username>', methods=['PUT'])
+@bp.route('/<username>', methods=['PUT'])
 def update_contact(username):
     if request.method == 'PUT':
         contact = get_contact(username)
@@ -92,7 +72,7 @@ def update_contact(username):
             return content, 404
 
 
-@app.route('/contacts/<username>', methods=['DELETE'])
+@bp.route('/<username>', methods=['DELETE'])
 def delete_contact(username):
     contact = get_contact(username)
 
@@ -111,7 +91,7 @@ def delete_contact(username):
     return content, 404
 
 
-@app.route('/contacts', methods=['POST'])
+@bp.route('/', methods=['POST'])
 def create_contact():
     if request.method == 'POST':
         if not request.is_json:
@@ -148,8 +128,3 @@ def create_contact():
             return content
 
         return error, 400
-
-
-if __name__ == '__main__':
-    db.create_all()
-    app.run()

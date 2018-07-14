@@ -31,45 +31,45 @@ def update_contact(username):
     if request.method == 'PUT':
         contact = get_contact(username)
 
-        if contact is not None:
-            if not request.is_json:
-                return 'Invalid JSON', 400
-            data = request.get_json()
-
-            new_username = data['username']
-            new_email = data['email']
-            new_first_name = data['first_name']
-            new_surname = data['surname']
-
-            updates = False
-            if new_username is not None:
-                updates = True
-                contact.username = new_username
-            if new_email is not None:
-                updates = True
-                contact.email = new_email
-            if new_first_name is not None:
-                updates = True
-                contact.first_name = new_first_name
-            if new_surname is not None:
-                updates = True
-                contact.surname = new_surname
-            
-            if updates:
-                try:
-                    db.session.commit()
-                except:
-                    content = 'Error inserting values into DB.'
-                    return content, 400
-
-                content = 'Contact: %s updated sucessfully.' % contact.username
-                return content
-
-            content = 'Contact: %s not updated. No new data given.'
-            return content, 400
-        else:
+        if contact is None:
             content = 'A contact with username: %s could not be found.' % username
             return content, 404
+
+        if not request.is_json:
+            return 'Invalid JSON', 400
+        data = request.get_json()
+
+        new_username = data['username']
+        new_email = data['email']
+        new_first_name = data['first_name']
+        new_surname = data['surname']
+
+        updates = False
+        if new_username is not None:
+            updates = True
+            contact.username = new_username
+        if new_email is not None:
+            updates = True
+            contact.email = new_email
+        if new_first_name is not None:
+            updates = True
+            contact.first_name = new_first_name
+        if new_surname is not None:
+            updates = True
+            contact.surname = new_surname
+        
+        if updates:
+            try:
+                db.session.commit()
+            except:
+                content = 'Error inserting values into DB.'
+                return content, 500
+
+            content = 'Contact: %s updated sucessfully.' % contact.username
+            return content
+
+        content = 'Contact: %s not updated. No new data given.' % contact.username
+        return content, 400
 
 
 @bp.route('/<username>', methods=['DELETE'])
@@ -82,7 +82,7 @@ def delete_contact(username):
             db.session.commit()
         except:
             content = 'Error attempting to delete contact: %s' % username
-            return content, 400
+            return content, 500
 
         content = 'Contact: %s deleted sucessfully.' % username
         return content
@@ -98,22 +98,21 @@ def create_contact():
             return 'Invalid JSON', 400
         data = request.get_json()
 
-        username = data['username']
-        email = data['email']
-        first_name = data['first_name']
-        surname = data['surname']
-
         error = None
-        if not username:
+        if 'username' not in data or not data['username']:
             error = 'Username is required.'
-        elif not email:
+        elif 'email' not in data or not data['email']:
             error = 'Email is required.'
-        elif not first_name:
+        elif 'first_name' not in data or not data['first_name']:
             error = 'First name is required.'
-        elif not surname:
+        elif 'surname' not in data or not data['surname']:
             error = 'Surname is required.'
 
         if error is None:
+            username = data['username']
+            email = data['email']
+            first_name = data['first_name']
+            surname = data['surname']
             try:
                 new_contact = Contact(username=username,
                                       email=email,
@@ -123,7 +122,7 @@ def create_contact():
                 db.session.commit()
             except:
                 content = 'Error inserting values into DB.'
-                return content, 400
+                return content, 500
             content = 'New contact: %s, created successfully.' % username
             return content
 

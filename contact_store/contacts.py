@@ -9,7 +9,7 @@ bp = Blueprint('contacts', __name__, url_prefix='/contacts')
 def get_contact(username):
     return Contact.query.filter_by(username=username).first()
 
-@bp.route('/', methods=['GET'])
+@bp.route('', methods=['GET'])
 def list_contacts():
     if request.method == 'GET':
         return jsonify(contacts=[i.serialize for i in Contact.query.all()])
@@ -91,7 +91,7 @@ def delete_contact(username):
     return content, 404
 
 
-@bp.route('/', methods=['POST'])
+@bp.route('', methods=['POST'])
 def create_contact():
     if request.method == 'POST':
         if not request.is_json:

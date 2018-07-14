@@ -3,11 +3,18 @@ from flask import Blueprint, jsonify, request, flash, url_for, redirect, \
 
 from contact_store.database import db
 from contact_store.models import Contact
+from contact_store.models import Email
 
 bp = Blueprint('contacts', __name__, url_prefix='/contacts')
 
-def get_contact(username):
-    return Contact.query.filter_by(username=username).first()
+def get_contact(username_or_email):
+    contact = Contact.query.filter_by(username=username_or_email).first()
+
+    if contact is not None:
+        return contact
+
+    return Contact.get_by_email(username_or_email)
+
 
 @bp.route('', methods=['GET'])
 def list_contacts():
@@ -15,14 +22,14 @@ def list_contacts():
         return jsonify(contacts=[i.serialize for i in Contact.query.all()])
 
 
-@bp.route('/<username>', methods=['GET'])
-def show_contact(username):
-    contact = get_contact(username)
+@bp.route('/<username_or_email>', methods=['GET'])
+def show_contact(username_or_email):
+    contact = get_contact(username_or_email)
 
     if contact is not None:
         return jsonify(contact.serialize)
     else:
-        content = 'A contact with username: %s could not be found.' % username
+        content = 'A contact with username or email: %s could not be found.' % username_or_email
         return content, 404
 
 
@@ -39,18 +46,32 @@ def update_contact(username):
             return 'Invalid JSON', 400
         data = request.get_json()
 
-        new_username = data['username']
-        new_email = data['email']
-        new_first_name = data['first_name']
-        new_surname = data['surname']
+        new_username = None
+        new_emails = None
+        new_first_name = None
+        new_surname = None
+
+        if 'username' in data:
+            new_username = data['username']
+        if 'emails' in data:
+            new_emails = data['emails']
+        if 'first_name' in data:
+            new_first_name = data['first_name']
+        if 'surname' in data:
+            new_surname = data['surname']
 
         updates = False
         if new_username is not None:
             updates = True
             contact.username = new_username
-        if new_email is not None:
+        if new_emails is not None:
             updates = True
-            contact.email = new_email
+            for email in contact.emails:
+                db.session.delete(email)
+            for email in new_emails:
+                new_email = Email(address=email['address'])
+                db.session.add(new_email)
+                contact.emails.append(new_email)
         if new_first_name is not None:
             updates = True
             contact.first_name = new_first_name
@@ -78,6 +99,8 @@ def delete_contact(username):
 
     if contact is not None:
         try:
+            for email in contact.emails:
+                db.session.delete(email)
             db.session.delete(contact)
             db.session.commit()
         except:
@@ -101,7 +124,7 @@ def create_contact():
         error = None
         if 'username' not in data or not data['username']:
             error = 'Username is required.'
-        elif 'email' not in data or not data['email']:
+        elif 'emails' not in data or not data['emails']:
             error = 'Email is required.'
         elif 'first_name' not in data or not data['first_name']:
             error = 'First name is required.'
@@ -110,14 +133,17 @@ def create_contact():
 
         if error is None:
             username = data['username']
-            email = data['email']
+            emails = data['emails']
             first_name = data['first_name']
             surname = data['surname']
             try:
                 new_contact = Contact(username=username,
-                                      email=email,
                                       first_name=first_name,
                                       surname=surname)
+                for address in emails:
+                    new_email = Email(address=address['address'])
+                    db.session.add(new_email)
+                    new_contact.emails.append(new_email)
                 db.session.add(new_contact)
                 db.session.commit()
             except:

@@ -13,6 +13,7 @@ def create_app(test_config=None):
                                                             'contact_store.sqlite'),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
+    app.url_map.strict_slashes = False
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

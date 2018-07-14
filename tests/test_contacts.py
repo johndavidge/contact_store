@@ -2,14 +2,14 @@ import json
 
 test_contact = {
         'username'   : 'test_contact',
-        'email'      : 'test@contact.com',
+        'emails'     : [{'address' : 'test@contact.com'}],
         'first_name' : 'Test',
         'surname'    : 'Contact',
     }
 
 test_contact_2 = {
         'username'   : 'test_contact_2',
-        'email'      : 'test@contact_2.com',
+        'emails'     : [{'address' : 'test@contact2.com'}],
         'first_name' : 'Test 2',
         'surname'    : 'Contact 2',
     }
@@ -28,7 +28,6 @@ def test_create_contact(client):
 def test_create_contact_missing_data(client):
     test_contact_incomplete = {
         'username'   : 'test_contact',
-        'first_name' : 'Test',
         'surname'    : 'Contact',
     }
     assert create_contact(client,
@@ -44,7 +43,15 @@ def test_show_contact(client):
 
     assert response.status_code == 200
     assert response.json['username'] == test_contact['username']
-    assert response.json['email'] == test_contact['email']
+    assert response.json['emails'] == test_contact['emails']
+    assert response.json['first_name'] == test_contact['first_name']
+    assert response.json['surname'] == test_contact['surname']
+
+    response = client.get('/contacts/%s' % test_contact['emails'][0]['address'])
+
+    assert response.status_code == 200
+    assert response.json['username'] == test_contact['username']
+    assert response.json['emails'] == test_contact['emails']
     assert response.json['first_name'] == test_contact['first_name']
     assert response.json['surname'] == test_contact['surname']
 
@@ -62,7 +69,7 @@ def test_update_contact(client):
     response = client.get('/contacts/%s' % test_contact_2['username'])
     assert response.status_code == 200
     assert response.json['username'] == test_contact_2['username']
-    assert response.json['email'] == test_contact_2['email']
+    assert response.json['emails'] == test_contact_2['emails']
     assert response.json['first_name'] == test_contact_2['first_name']
     assert response.json['surname'] == test_contact_2['surname']
 

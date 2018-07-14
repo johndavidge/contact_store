@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, flash, url_for, redirect, \
                   render_template
 
-from contact_store.models import db
+from contact_store.database import db
 from contact_store.models import Contact
 
 bp = Blueprint('contacts', __name__, url_prefix='/contacts')

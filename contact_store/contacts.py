@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, flash, url_for, redirect, \
                   render_template
 
 from contact_store.database import db
+from contact_store.tasks import celery
 from contact_store.models import Contact
 from contact_store.models import Email
 
@@ -120,6 +121,8 @@ def create_contact():
         if not request.is_json:
             return 'Invalid JSON', 400
         data = request.get_json()
+
+        print(data)
 
         error = None
         if 'username' not in data or not data['username']:

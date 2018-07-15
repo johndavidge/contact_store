@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 
+import contact_store.tasks as celery
 from contact_store.database import db
 
 
@@ -35,5 +36,7 @@ def create_app(test_config=None):
 
     from . import contacts
     app.register_blueprint(contacts.bp)
+
+    celery.make_celery(app)
 
     return app

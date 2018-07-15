@@ -112,16 +112,18 @@ The contact_store API supports getting, creating, updating, and deleting of cont
 }
 ```
 
+You can interact with the API at the following endpoints:
+
 ### /contacts
 
-**GET** - Returns a JSON formatted list of all stored contacts.
+_GET - Returns a JSON formatted list of all stored contacts._
 
-**POST** - Accepts a JSON formatted contact and stores it (if valid).
+_POST - Accepts a JSON formatted contact and stores it (if valid)._
 
 ### /contacts/<username_or_email>
 
-**GET** - Returns a JSON formatted contact if it exists.
+_GET** - Returns a JSON formatted contact if it exists._
 
-**PUT** - Updates a stored contact if it exists.
+_PUT - Updates a stored contact if it exists._
 
-**DELETE** - Deletes a stored contact if it exists.
+_DELETE - Deletes a stored contact if it exists._

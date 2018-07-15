@@ -13,12 +13,12 @@ def make_celery(app):
     celery.conf.update(app.config)
     celery.conf.beat_schedule = Config.CELERYBEAT_SCHEDULE
 
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
+#    class ContextTask(celery.Task):
+#        def __call__(self, *args, **kwargs):
+#            with app.app_context():
+#                return self.run(*args, **kwargs)
+#
+#    celery.Task = ContextTask
 
 
 @celery.task(name='tasks.create_contact')
@@ -30,13 +30,13 @@ def create_contact():
     email1 = first_name + '@' + surname + '.com'
     email2 = surname + '@' + first_name + '.com'
     contact = {
-            'username'   : username,
-            'emails'     : [
-                    {'address' : email1},
-                    {'address' : email2}
+            'username': username,
+            'emails': [
+                    {'address': email1},
+                    {'address': email2}
                 ],
-            'first_name' : first_name,
-            'surname'    : surname,
+            'first_name': first_name,
+            'surname': surname,
         }
 
     result = requests.post(request_url, json=contact)

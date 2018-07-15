@@ -1,12 +1,11 @@
-from flask import Blueprint, jsonify, request, flash, url_for, redirect, \
-                  render_template
+from flask import Blueprint, jsonify, request
 
 from contact_store.database import db
-from contact_store.tasks import celery
 from contact_store.models import Contact
 from contact_store.models import Email
 
 bp = Blueprint('contacts', __name__, url_prefix='/contacts')
+
 
 def get_contact(username_or_email):
     contact = Contact.query.filter_by(username=username_or_email).first()
@@ -30,7 +29,8 @@ def show_contact(username_or_email):
     if contact is not None:
         return jsonify(contact.serialize)
     else:
-        content = 'A contact with username or email: %s could not be found.' % username_or_email
+        content = ('A contact with username or email: '
+                   '%s could not be found.' % username_or_email)
         return content, 404
 
 
@@ -40,7 +40,8 @@ def update_contact(username):
         contact = get_contact(username)
 
         if contact is None:
-            content = 'A contact with username: %s could not be found.' % username
+            content = ('A contact with username: '
+                       '%s could not be found.' % username)
             return content, 404
 
         if not request.is_json:
@@ -79,18 +80,19 @@ def update_contact(username):
         if new_surname is not None:
             updates = True
             contact.surname = new_surname
-        
+
         if updates:
             try:
                 db.session.commit()
-            except:
+            except Exception:
                 content = 'Error inserting values into DB.'
                 return content, 500
 
             content = 'Contact: %s updated sucessfully.' % contact.username
             return content
 
-        content = 'Contact: %s not updated. No new data given.' % contact.username
+        content = ('Contact: %s not updated. '
+                   'No new data given.' % contact.username)
         return content, 400
 
 
@@ -104,7 +106,7 @@ def delete_contact(username):
                 db.session.delete(email)
             db.session.delete(contact)
             db.session.commit()
-        except:
+        except Exception:
             content = 'Error attempting to delete contact: %s' % username
             return content, 500
 
@@ -149,7 +151,7 @@ def create_contact():
                     new_contact.emails.append(new_email)
                 db.session.add(new_contact)
                 db.session.commit()
-            except:
+            except Exception:
                 content = 'Error inserting values into DB.'
                 return content, 500
             content = 'New contact: %s, created successfully.' % username

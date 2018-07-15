@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+
 class Config:
     FLASK_URL = 'http://localhost:5000'
     CELERY_BROKER_URL = 'redis://localhost'
@@ -10,7 +11,6 @@ class Config:
             'schedule': timedelta(seconds=15)
         }
     }
-
 
     @staticmethod
     def init_app(app):

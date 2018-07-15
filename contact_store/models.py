@@ -20,10 +20,10 @@ class Contact(db.Model):
     @property
     def serialize(self):
         return {
-            'username'   : self.username,
-            'emails'     : [i.serialize for i in self.emails],
-            'first_name' : self.first_name,
-            'surname'    : self.surname,
+            'username':   self.username,
+            'emails':     [i.serialize for i in self.emails],
+            'first_name': self.first_name,
+            'surname':    self.surname,
         }
 
     @classmethod
@@ -48,5 +48,5 @@ class Email(db.Model):
     @property
     def serialize(self):
         return {
-            'address'    : self.address,
+            'address': self.address,
         }

@@ -122,7 +122,7 @@ _POST - Accepts a JSON formatted contact and stores it (if valid)._
 
 ### /contacts/<username_or_email>
 
-_GET** - Returns a JSON formatted contact if it exists._
+_GET - Returns a JSON formatted contact if it exists._
 
 _PUT - Updates a stored contact if it exists._
 
